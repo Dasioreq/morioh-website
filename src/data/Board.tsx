@@ -1,11 +1,14 @@
+import { enPassant, type MoveCallback } from "./Moves";
 import { Piece, rook, knight, bishop, queen, king, pawn } from "./Pieces";
 import { samePosition, type Position } from "./Position";
 
 export class Board {
     pieces: Piece[] = [];
+    lastPlayedMove: MoveCallback | undefined;
 
-    constructor(pieces: Piece[]) {
+    constructor(pieces: Piece[], lastPlayedMove: MoveCallback | undefined = undefined) {
         this.pieces = pieces;
+        this.lastPlayedMove = lastPlayedMove;
     }
 
     public pieceAt(position: Position): Piece | undefined {
@@ -25,27 +28,41 @@ export class Board {
     }
 
     public playMove(pieceIndex: number, position: Position): boolean {
-        console.log(pieceIndex, position);
         const movingPiece = this.pieces[pieceIndex];
 
         if(!movingPiece || !movingPiece.canMove(position, this)) 
             return false;
 
-        let result = this.pieceAt(position);
-        if(result)
-            this.pieces = this.pieces.filter(function(piece) { return piece != result });
+        const self = this;
+        this.lastPlayedMove = movingPiece.possibleMoves.find(function(rule: MoveCallback) { return rule(movingPiece, position, self) })
+
+        if(this.lastPlayedMove == enPassant) {
+            let direction = movingPiece.isWhite
+                ? 1
+                : -1
+            let result = this.pieceAt([position[0], position[1] - direction]);
+            if(result)
+                this.pieces = this.pieces.filter(function(piece) { return piece != result });
+        }
+        else {
+            let result = this.pieceAt(position);
+            if(result)
+                this.pieces = this.pieces.filter(function(piece) { return piece != result });
+        }
+        
 
         movingPiece.hasMoved = true;
         movingPiece.position = position;
 
-        console.log(this.pieces[pieceIndex].hasMoved);
+        isPlayerWhite = !isPlayerWhite;
 
         return true;
     }
 
     public clone() {
         return new Board (
-            this.pieces.map((piece) => {return piece.clone()})
+            this.pieces.map((piece) => {return piece.clone()}),
+            this.lastPlayedMove
         )
     }
 }

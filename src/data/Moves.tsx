@@ -1,5 +1,5 @@
 import type { Board } from "./Board";
-import type { Piece } from "./Pieces";
+import { PieceType, type Piece } from "./Pieces";
 import type { Position } from "./Position"
 
 export type MoveCallback = (self: Piece, newPos: Position, board: Board) => boolean;
@@ -50,31 +50,106 @@ export function pawnMove(self: Piece, [xNew, yNew]: Position, board: Board): boo
     if(xPos == xNew && yPos == yNew)
         return false;
 
-    if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite)
+    if(board.pieceAt([xNew, yNew]))
         return false;
 
     const direction = self.isWhite
         ? 1
         : -1;
 
-    if(self.hasMoved) {
-        if(xNew != xPos)
-            return false;
+    if(xNew != xPos)
+        return false;
 
-        if(yPos + direction != yNew)
-            return false;
+    if(yPos + direction != yNew)
+        return false;
 
-        return true;
-    } 
-    else {
-        if(xNew != xPos)
-            return false;
+    return true;
+}
 
-        if(yPos + direction != yNew && yPos + 2 * direction != yNew)
-            return false;
+export function pawnDouble(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
+    const [xPos, yPos] = self.position;
 
-        return true;
-    }
+    if(xPos == xNew && yPos == yNew)
+        return false;
+
+    if(board.pieceAt([xNew, yNew]))
+        return false;
+
+    const direction = self.isWhite
+        ? 1
+        : -1;
+
+    if(self.hasMoved)
+        return false;
+
+    if(xNew != xPos)
+        return false;
+
+    if(yPos + direction != yNew && yPos + 2 * direction != yNew)
+        return false;
+
+    return true;
+}
+
+export function pawnCapture(self: Piece, [xNew, yNew]: Position, board: Board) {
+    const [xPos, yPos] = self.position;
+
+    if(yNew <= yPos)
+        return false;
+
+    if(xNew == xPos || yNew == yPos)
+        return false;
+
+    if(!board.pieceAt([xNew, yNew]))
+        return false;
+
+    if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite)
+        return false;
+
+    const xNewAbs = Math.abs(xNew - xPos);
+    const yNewAbs = Math.abs(yNew - yPos);
+
+    if(xNewAbs + yNewAbs != 2)
+        return false;
+
+    return true;
+}
+
+// I hate the French
+export function enPassant(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
+    console.log(board.lastPlayedMove);
+    const [xPos, yPos] = self.position;
+
+    if(xNew == xPos && yNew == yPos) 
+        return false;
+
+
+    if(board.lastPlayedMove != pawnDouble)
+        return false;
+
+
+    let direction = self.isWhite
+        ? 1
+        : -1
+
+    const xNewAbs = Math.abs(xNew - xPos);
+    const yNewAbs = Math.abs(yNew - yPos);
+
+    if(xNewAbs + yNewAbs != 2)
+        return false;
+
+    const piece = board.pieceAt([xNew, yNew - direction]);
+
+    if(!piece)
+        return false;
+
+    if(piece?.pieceType != PieceType.Pawn)
+        return false;
+
+    if(piece?.isWhite == self.isWhite)
+        return false;
+
+    return true;
 }
 
 export function knightMove(self: Piece, [xNew, yNew]: Position, board: Board): boolean {

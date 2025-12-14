@@ -1,5 +1,5 @@
 import type { Position } from "./Position";
-import { diagonalMove, knightMove, pawnMove, verticalHorizontalMove, type MoveCallback } from "./Moves";
+import { diagonalMove, enPassant, knightMove, pawnCapture, pawnDouble, pawnMove, verticalHorizontalMove, type MoveCallback } from "./Moves";
 import { Board } from "./Board";
 
 export const PieceType =  {
@@ -32,7 +32,7 @@ export class Piece {
 
     public canMove(position: Position, board: Board) {
         let self = this;
-        return this.possibleMoves.some(function(rule: MoveCallback) { return rule(self, position, board) });
+        return this.possibleMoves.some(function(rule: MoveCallback) { return rule(self, position, board); });
     }
 
     public clone() {
@@ -48,7 +48,7 @@ export class Piece {
 }
 
 export function pawn(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.Pawn, `/src/assets/pieces/pawn_${isWhite? 1 : 0}.svg`, position, isWhite, [pawnMove]);
+    return new Piece(PieceType.Pawn, `/src/assets/pieces/pawn_${isWhite? 1 : 0}.svg`, position, isWhite, [pawnMove, pawnDouble, pawnCapture, enPassant]);
 }
 
 export function rook(position: Position, isWhite: boolean): Piece {
