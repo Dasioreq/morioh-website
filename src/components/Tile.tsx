@@ -19,25 +19,27 @@ export function Tile({ index, position, board, update }: Props) {
 
     const tileHighlight = selectedPieceId > -1
         ? board.pieces[selectedPieceId].canMove(position, board)
-            ? "highlight"
-            : ""
-        : ""
+            ? <img src = "src/assets/tile_highlight.svg" className = "tileHighlight"></img>
+            : undefined
+        : undefined
 
     if(!piece) {
-        return <div className = {`chessboardTile ${colorClass} ${tileHighlight}`} onClick={() => {
+        return <div className = {`chessboardTile ${colorClass}`} onClick={() => {
             update(() => {
                 const cloned = board.clone();
                 if(cloned.playMove(selectedPieceId, position)) 
                     deselectPiece();
                 return cloned;
             });
-        }}></div>;
+        }}>{tileHighlight}</div>;
     }
     else if(piece !== undefined) {
 
         let pieceHighlight = pieceIndex == selectedPieceId
             ? "highlight"
-            : "";
+            : tileHighlight
+                ? "highlight"
+                : "";
 
         let defPiece = piece;
         function onClick() {
