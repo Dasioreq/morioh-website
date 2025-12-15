@@ -115,18 +115,15 @@ export function pawnCapture(self: Piece, [xNew, yNew]: Position, board: Board) {
     return true;
 }
 
-// I hate the French
 export function enPassant(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
     console.log(board.lastPlayedMove);
     const [xPos, yPos] = self.position;
 
-    if(xNew == xPos && yNew == yPos) 
+    if(xNew == xPos || yNew == yPos) 
         return false;
-
 
     if(board.lastPlayedMove != pawnDouble)
         return false;
-
 
     let direction = self.isWhite
         ? 1
