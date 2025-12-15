@@ -34,7 +34,6 @@ export function verticalHorizontalMove(self: Piece, [xNew, yNew]: Position, boar
         for(let x = xNew + direction; x != xPos; x += direction) {
             if(board.pieceAt([x, yPos]))
             {
-                console.log("AAA");
                 return false;
             }
         }
@@ -94,8 +93,14 @@ export function pawnDouble(self: Piece, [xNew, yNew]: Position, board: Board): b
 export function pawnCapture(self: Piece, [xNew, yNew]: Position, board: Board) {
     const [xPos, yPos] = self.position;
 
-    if(yNew <= yPos)
-        return false;
+    if(self.isWhite) {
+        if(yNew <= yPos)
+            return false;
+    }
+    else {
+        if(yNew >= yPos)
+            return false;
+    }
 
     if(xNew == xPos || yNew == yPos)
         return false;
@@ -116,7 +121,6 @@ export function pawnCapture(self: Piece, [xNew, yNew]: Position, board: Board) {
 }
 
 export function enPassant(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
-    console.log(board.lastPlayedMove);
     const [xPos, yPos] = self.position;
 
     if(xNew == xPos || yNew == yPos) 
