@@ -1,5 +1,5 @@
 import type { Position } from "./Position";
-import { diagonalMove, enPassant, knightMove, pawnCapture, pawnDouble, pawnMove, verticalHorizontalMove, type MoveCallback } from "./Moves";
+import { Move, type MoveCallback } from "./Moves";
 import { Board } from "./Board";
 
 export const PieceType =  {
@@ -48,25 +48,25 @@ export class Piece {
 }
 
 export function pawn(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.Pawn, `/src/assets/pieces/pawn_${isWhite? 1 : 0}.svg`, position, isWhite, [pawnMove, pawnDouble, pawnCapture, enPassant]);
+    return new Piece(PieceType.Pawn, `/src/assets/pieces/pawn_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.pawnMove, Move.pawnDouble, Move.pawnCapture, Move.enPassant]);
 }
 
 export function rook(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.Rook, `/src/assets/pieces/rook_${isWhite? 1 : 0}.svg`, position, isWhite, [verticalHorizontalMove]);
+    return new Piece(PieceType.Rook, `/src/assets/pieces/rook_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.verticalHorizontalMove]);
 }
 
 export function knight(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.Knight, `/src/assets/pieces/knight_${isWhite? 1 : 0}.svg`, position, isWhite, [knightMove]);
+    return new Piece(PieceType.Knight, `/src/assets/pieces/knight_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.knightMove]);
 }
 
 export function bishop(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.Bishop, `/src/assets/pieces/bishop_${isWhite? 1 : 0}.svg`, position, isWhite, [diagonalMove]);
+    return new Piece(PieceType.Bishop, `/src/assets/pieces/bishop_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.diagonalMove]);
 }
 
 export function queen(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.Queen, `/src/assets/pieces/queen_${isWhite? 1 : 0}.svg`, position, isWhite, [verticalHorizontalMove, diagonalMove]);
+    return new Piece(PieceType.Queen, `/src/assets/pieces/queen_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.verticalHorizontalMove, Move.diagonalMove]);
 }
 
 export function king(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.King, `/src/assets/pieces/king_${isWhite? 1 : 0}.svg`, position, isWhite, [verticalHorizontalMove]);
+    return new Piece(PieceType.King, `/src/assets/pieces/king_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.verticalHorizontalMove]);
 }
