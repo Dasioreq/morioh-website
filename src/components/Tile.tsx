@@ -19,7 +19,7 @@ export function Tile({ index, position, board, update }: Props) {
 
     const tileHighlight = selectedPieceId > -1
         ? board.pieces[selectedPieceId].canMove(position, board)
-            ? <img src = "src/assets/tile_highlight.svg" className = "tileHighlight"></img>
+            ? <img src = "/assets/tile_highlight.svg" className = "tileHighlight"></img>
             : undefined
         : undefined
 
