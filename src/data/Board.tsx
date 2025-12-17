@@ -1,4 +1,4 @@
-import { enPassant, type MoveCallback } from "./Moves";
+import { Move, type MoveCallback } from "./Moves";
 import { Piece, rook, knight, bishop, queen, king, pawn } from "./Pieces";
 import { samePosition, type Position } from "./Position";
 
@@ -36,7 +36,7 @@ export class Board {
         const self = this;
         this.lastPlayedMove = movingPiece.possibleMoves.find(function(rule: MoveCallback) { return rule(movingPiece, position, self) })
 
-        if(this.lastPlayedMove == enPassant) {
+        if(this.lastPlayedMove == Move.enPassant) {
             let direction = movingPiece.isWhite
                 ? 1
                 : -1
