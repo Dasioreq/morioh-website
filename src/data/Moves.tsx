@@ -212,4 +212,22 @@ export class Move {
 
         return true;
     }
+
+    static kingMove(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
+        const [xPos, yPos] = self.position;
+
+        if(xNew == xPos && yNew == yPos)
+            return false;
+
+        if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite)
+            return false;
+
+        const xNewAbs = Math.abs(xNew - xPos);
+        const yNewAbs = Math.abs(yNew - yPos);
+
+        if(xNewAbs > 1 || yNewAbs > 1)
+            return false;
+
+        return true;
+    }
 }
