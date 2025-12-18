@@ -79,6 +79,9 @@ export class Move {
             ? 1
             : -1;
 
+        if(board.pieceAt([xNew, yNew - direction]))
+            return false;
+
         if(self.hasMoved)
             return false;
 
