@@ -231,4 +231,46 @@ export class Rule {
 
         return Move.basicMove;
     }
+
+    static castle(self: Piece, [xNew, yNew]: Position, board: Board): MoveCallback | undefined {
+        if(self.hasMoved)
+            return undefined;
+
+
+        const [xPos, yPos] = self.position;
+
+        if(xNew == xPos && yNew == yPos)
+            return undefined;
+
+
+        if(yNew != yPos)
+            return undefined;
+
+
+        const piece = board.pieceAt([xNew, yNew]);
+
+        if(!piece)
+            return undefined;
+
+
+        if(board.pieceAt([xNew, yNew])?.isWhite != self.isWhite || board.pieceAt([xNew, yNew])?.pieceType != PieceType.Rook)
+            return undefined;
+
+
+        if(piece.hasMoved)
+            return undefined;
+
+
+        const direction = xNew > xPos
+            ? -1
+            : 1
+        
+        for(let x = xNew + direction; x != xPos; x += direction)
+        {
+            if(board.pieceAt([x, yNew]))
+                return undefined;
+        }
+
+        return Move.castle;
+    }
 }

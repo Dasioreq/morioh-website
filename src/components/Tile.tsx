@@ -54,6 +54,13 @@ export function Tile({ index, position, board, update }: Props) {
                 : "";
 
         function onClick() {
+            if(selectedPieceId != -1) {
+                if(board.pieces[selectedPieceId].possibleMove(defPiece.position, board)) {
+                    update(movePiece);
+                    return;
+                }
+            }
+            
             if(isPlayersTeam(defPiece)) {
                 selectPiece(defPiece, pieceIndex);
                 update(() => {return board.clone()});

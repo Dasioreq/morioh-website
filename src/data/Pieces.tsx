@@ -78,5 +78,5 @@ export function queen(position: Position, isWhite: boolean): Piece {
 }
 
 export function king(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.King, `/assets/pieces/king_${isWhite? 1 : 0}.svg`, position, isWhite, [Rule.kingMove]);
+    return new Piece(PieceType.King, `/assets/pieces/king_${isWhite? 1 : 0}.svg`, position, isWhite, [Rule.kingMove, Rule.castle]);
 }
