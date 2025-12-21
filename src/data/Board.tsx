@@ -1,12 +1,12 @@
-import { Move, type MoveCallback } from "./Moves";
+import { type RuleCallback } from "./Rules";
 import { Piece, rook, knight, bishop, queen, king, pawn } from "./Pieces";
 import { samePosition, type Position } from "./Position";
 
 export class Board {
     pieces: Piece[] = [];
-    lastPlayedMove: MoveCallback | undefined;
+    lastPlayedMove: RuleCallback | undefined;
 
-    constructor(pieces: Piece[], lastPlayedMove: MoveCallback | undefined = undefined) {
+    constructor(pieces: Piece[], lastPlayedMove: RuleCallback | undefined = undefined) {
         this.pieces = pieces;
         this.lastPlayedMove = lastPlayedMove;
     }
@@ -25,38 +25,6 @@ export class Board {
                 return i;
             }
         }
-    }
-
-    public playMove(pieceIndex: number, position: Position): boolean {
-        const movingPiece = this.pieces[pieceIndex];
-
-        if(!movingPiece || !movingPiece.canMove(position, this)) 
-            return false;
-
-        const self = this;
-        this.lastPlayedMove = movingPiece.possibleMoves.find(function(rule: MoveCallback) { return rule(movingPiece, position, self) })
-
-        if(this.lastPlayedMove == Move.enPassant) {
-            let direction = movingPiece.isWhite
-                ? 1
-                : -1
-            let result = this.pieceAt([position[0], position[1] - direction]);
-            if(result)
-                this.pieces = this.pieces.filter(function(piece) { return piece != result });
-        }
-        else {
-            let result = this.pieceAt(position);
-            if(result)
-                this.pieces = this.pieces.filter(function(piece) { return piece != result });
-        }
-        
-
-        movingPiece.hasMoved = true;
-        movingPiece.position = position;
-
-        isPlayerWhite = !isPlayerWhite;
-
-        return true;
     }
 
     public clone() {
@@ -123,4 +91,8 @@ export function deselectPiece() {
 
 export function isPlayersTeam(piece: Piece) {
     return piece.isWhite == isPlayerWhite;
+}
+
+export function switchTeam() {
+    isPlayerWhite = !isPlayerWhite;
 }

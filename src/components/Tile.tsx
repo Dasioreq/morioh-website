@@ -1,4 +1,4 @@
-import { Board, deselectPiece, isPlayersTeam, selectedPieceId, selectPiece } from "../data/Board";
+import { Board, deselectPiece, isPlayersTeam, selectedPieceId, selectPiece, switchTeam } from "../data/Board";
 import type { Position } from "../data/Position";
 import "./Tile.css";
 
@@ -10,50 +10,56 @@ interface Props {
 }
 
 export function Tile({ index, position, board, update }: Props) {
-    const piece = board.pieceAt(position);
-    const pieceIndex = board.indexAt(position);
-
-    const colorClass = index % 2
-        ? "black"
-        : "white";
-
     const tileHighlight = selectedPieceId > -1
-        ? board.pieces[selectedPieceId].canMove(position, board)
+        ? board.pieces[selectedPieceId].possibleMove(position, board)
             ? <img src = "/assets/tile_highlight.svg" className = "tileHighlight"></img>
             : undefined
         : undefined
 
-    if(!piece) {
-        return <div className = {`chessboardTile ${colorClass}`} onClick={() => {
-            update(() => {
-                const cloned = board.clone();
-                if(cloned.playMove(selectedPieceId, position)) 
-                    deselectPiece();
-                return cloned;
-            });
-        }}>{tileHighlight}</div>;
-    }
-    else if(piece !== undefined) {
+    function movePiece() {
+        const cloned = board.clone();
+        const selectedPiece = cloned.pieces[selectedPieceId];
 
-        let pieceHighlight = pieceIndex == selectedPieceId
+        if(!selectedPiece)
+            return cloned;
+
+        const move = selectedPiece.possibleMove(position, cloned);
+
+        if(!move)
+            return cloned;
+
+        move(cloned, selectedPiece, position)
+        deselectPiece();
+        switchTeam();
+
+        return cloned;
+    }
+
+    const piece = board.pieceAt(position);
+    const colorClass = index % 2
+            ? "black"
+            : "white";
+
+    if(!piece) {
+        return <div className = {`chessboardTile ${colorClass}`} onClick={() => { update(movePiece); }}>{tileHighlight}</div>;
+    }
+    else {
+        const pieceIndex = board.indexAt(position);
+        const defPiece = piece; // Required because Typescript still marks piece as possibly undefined... unless it's assigned? If it works - don't touch it
+
+        const pieceHighlight = pieceIndex == selectedPieceId
             ? "highlight"
             : tileHighlight
                 ? "highlight"
                 : "";
 
-        let defPiece = piece;
         function onClick() {
             if(isPlayersTeam(defPiece)) {
                 selectPiece(defPiece, pieceIndex);
                 update(() => {return board.clone()});
             }
             else {
-                update(() => {
-                    const cloned = board.clone();
-                    if(cloned.playMove(selectedPieceId, position)) 
-                        deselectPiece();
-                    return cloned;
-                });
+                update(movePiece);
             }
         }
 
