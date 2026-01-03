@@ -1,232 +1,61 @@
 import type { Board } from "./Board";
 import { PieceType, type Piece } from "./Pieces";
-import type { Position } from "./Position"
+import type { Position } from "./Position";
+import { type RuleCallback } from "./Rules";
 
-export type MoveCallback = (self: Piece, newPos: Position, board: Board) => boolean;
+export type MoveCallback = (board: Board, movingPiece: Piece, position: Position) => boolean;
 
 export class Move {
-    static verticalHorizontalMove(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
-        const [xPos, yPos] = self.position;
+    static basicMove(board: Board, movingPiece: Piece, position: Position): boolean {
+        board.lastPlayedMove = movingPiece.moveRules.find(function(rule: RuleCallback) { return rule(movingPiece, position, board) })
 
-        if(xPos == xNew && yPos == yNew)
-            return false;
+        let capture = board.pieceAt(position);
+        if(capture)
+            board.pieces = board.pieces.filter(function(piece) { return piece != capture });
 
-        if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite) {
-            return false;
-        }
-
-        if(xNew == xPos) {
-            let direction: number = yNew > yPos
-                ? -1
-                : 1;
-
-            for(let y = yNew + direction; y != yPos; y += direction) {
-                if(board.pieceAt([xPos, y]))
-                    return false;
-            }
-            return true;
-        }
-
-        if(yNew == yPos) {
-            let direction: number = xNew > xPos
-                ? -1
-                : 1;
-
-            for(let x = xNew + direction; x != xPos; x += direction) {
-                if(board.pieceAt([x, yPos]))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    static pawnMove(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
-        const [xPos, yPos] = self.position;
-
-        if(xPos == xNew && yPos == yNew)
-            return false;
-
-        if(board.pieceAt([xNew, yNew]))
-            return false;
-
-        const direction = self.isWhite
-            ? 1
-            : -1;
-
-        if(xNew != xPos)
-            return false;
-
-        if(yPos + direction != yNew)
-            return false;
+        movingPiece.hasMoved = true;
+        movingPiece.position = position;
 
         return true;
     }
 
-    static pawnDouble(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
-        const [xPos, yPos] = self.position;
+    static enPassant(board: Board, movingPiece: Piece, position: Position): boolean {
+        board.lastPlayedMove = movingPiece.moveRules.find(function(rule: RuleCallback) { return rule(movingPiece, position, board) })
 
-        if(xPos == xNew && yPos == yNew)
-            return false;
-
-        if(board.pieceAt([xNew, yNew]))
-            return false;
-
-        const direction = self.isWhite
-            ? 1
-            : -1;
-
-        if(board.pieceAt([xNew, yNew - direction]))
-            return false;
-
-        if(self.hasMoved)
-            return false;
-
-        if(xNew != xPos)
-            return false;
-
-        if(yPos + direction != yNew && yPos + 2 * direction != yNew)
-            return false;
-
-        return true;
-    }
-
-    static pawnCapture(self: Piece, [xNew, yNew]: Position, board: Board) {
-        const [xPos, yPos] = self.position;
-
-        if(self.isWhite) {
-            if(yNew <= yPos)
-                return false;
-        }
-        else {
-            if(yNew >= yPos)
-                return false;
-        }
-
-        if(xNew == xPos || yNew == yPos)
-            return false;
-
-        if(!board.pieceAt([xNew, yNew]))
-            return false;
-
-        if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite)
-            return false;
-
-        const xNewAbs = Math.abs(xNew - xPos);
-        const yNewAbs = Math.abs(yNew - yPos);
-
-        if(xNewAbs + yNewAbs != 2)
-            return false;
-
-        return true;
-    }
-
-    static enPassant(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
-        const [xPos, yPos] = self.position;
-
-        if(xNew == xPos || yNew == yPos) 
-            return false;
-
-        if(board.lastPlayedMove != Move.pawnDouble)
-            return false;
-
-        let direction = self.isWhite
+        let direction = movingPiece.isWhite
             ? 1
             : -1
+        let capture = board.pieceAt([position[0], position[1] - direction]);
+        if(capture)
+            board.pieces = board.pieces.filter(function(piece) { return piece != capture });
 
-        const xNewAbs = Math.abs(xNew - xPos);
-        const yNewAbs = Math.abs(yNew - yPos);
-
-        if(xNewAbs + yNewAbs != 2)
-            return false;
-
-        const piece = board.pieceAt([xNew, yNew - direction]);
-
-        if(!piece)
-            return false;
-
-        if(piece?.pieceType != PieceType.Pawn)
-            return false;
-
-        if(piece?.isWhite == self.isWhite)
-            return false;
+        movingPiece.hasMoved = true;
+        movingPiece.position = position;
 
         return true;
     }
 
-    static knightMove(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
-        const [xPos, yPos] = self.position;
+    static castle(board: Board, movingPiece: Piece, position: Position): boolean {
+        board.lastPlayedMove = movingPiece.moveRules.find(function(rule: RuleCallback) { return rule(movingPiece, position, board) })
 
-        if(xNew == xPos || yNew == yPos) 
-            return false;
-
-        if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite)
-            return false;
-
-        const xNewAbs = Math.abs(xNew - xPos);
-        const yNewAbs = Math.abs(yNew - yPos);
-
-        if(xNewAbs + yNewAbs == 3)
-            return true;
-
-        return false;
-    }
-
-    static diagonalMove(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
-        const [xPos, yPos] = self.position;
-
-        if(xNew == xPos && yNew == yPos)
-            return false;
-
-        if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite)
-            return false;
-
-        const xNewAbs = Math.abs(xNew - xPos);
-        const yNewAbs = Math.abs(yNew - yPos);
-
-        if(yNewAbs != xNewAbs && yNewAbs != -xNewAbs)
-            return false;
-
-        const xDir = xNew > xPos
-            ? -1
-            : 1
-
-        const yDir = yNew > yPos
-            ? -1
-            : 1
-
-        for(let x = xNew + xDir; x != xPos; x += xDir) {
-            for(let y = yNew + yDir; y != yPos; y += yDir) {
-                const xAbs = Math.abs(x - xPos);
-                const yAbs = Math.abs(y - yPos);
-
-                if(yAbs == xAbs || yAbs == -xAbs) {
-                    if(board.pieceAt([x, y]))
-                        return false;
-                }
-            }
+        let direction = position[0] > movingPiece.position[0]
+            ? 1
+            : -1
+        let rook: Piece | undefined = undefined;
+        for(let xi = position[0] + direction; xi < 8 && xi >= 0; xi += direction) {
+            let piece = board.pieceAt([xi, position[1]]);
+            if(!piece)
+                continue;
+            if(piece.isWhite != movingPiece.isWhite || piece.hasMoved || piece.pieceType != PieceType.Rook)
+                continue;
+            rook = piece;
+            break;
         }
+        if(rook)
+            rook.position = [position[0] - direction, position[1]];
 
-        return true;
-    }
-
-    static kingMove(self: Piece, [xNew, yNew]: Position, board: Board): boolean {
-        const [xPos, yPos] = self.position;
-
-        if(xNew == xPos && yNew == yPos)
-            return false;
-
-        if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite)
-            return false;
-
-        const xNewAbs = Math.abs(xNew - xPos);
-        const yNewAbs = Math.abs(yNew - yPos);
-
-        if(xNewAbs > 1 || yNewAbs > 1)
-            return false;
+        movingPiece.hasMoved = true;
+        movingPiece.position = position;
 
         return true;
     }

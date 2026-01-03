@@ -6,6 +6,6 @@ export default function Game() {
     const [board, updateBoard] = useState(initialBoard);
 
     return <>
-        <Chessboard board = {board} update = {updateBoard}></Chessboard>
+        <Chessboard board = {board} update = {updateBoard}/>
     </>
 }

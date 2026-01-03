@@ -1,6 +1,7 @@
 import type { Position } from "./Position";
-import { Move, type MoveCallback } from "./Moves";
+import { Rule, type RuleCallback } from "./Rules";
 import { Board } from "./Board";
+import type { MoveCallback } from "./Moves";
 
 export const PieceType =  {
     Pawn: 0,
@@ -18,21 +19,30 @@ export class Piece {
     imgPath: string;
     position: Position;
     isWhite: boolean;
-    possibleMoves: MoveCallback[];
+    moveRules: RuleCallback[];
     hasMoved: boolean;
 
-    constructor(type: PieceType, imgPath: string, position: Position, isWhite: boolean, possibleMoves: MoveCallback[], hasMoved = false) {
+    constructor(type: PieceType, imgPath: string, position: Position, isWhite: boolean, moveRules: RuleCallback[], hasMoved = false) {
         this.pieceType = type;
         this.imgPath = imgPath;
         this.position = position;
         this.isWhite = isWhite;
-        this.possibleMoves = possibleMoves;
+        this.moveRules = moveRules;
         this.hasMoved = hasMoved;
     }
 
-    public canMove(position: Position, board: Board) {
+    public possibleMove(position: Position, board: Board): MoveCallback | undefined {
         let self = this;
-        return this.possibleMoves.some(function(rule: MoveCallback) { return rule(self, position, board); });
+        const result = this.moveRules.map(function(rule: RuleCallback) {
+            return rule(self, position, board);
+        }).filter(function( element ) { 
+            return element !== undefined; 
+        });
+
+        if(result.length > 0)
+            return result[0];
+        else
+            return undefined;
     }
 
     public clone() {
@@ -41,32 +51,32 @@ export class Piece {
             this.imgPath,
             this.position,
             this.isWhite,
-            this.possibleMoves,
+            this.moveRules,
             this.hasMoved
         );
     }
 }
 
 export function pawn(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.Pawn, `/assets/pieces/pawn_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.pawnMove, Move.pawnDouble, Move.pawnCapture, Move.enPassant]);
+    return new Piece(PieceType.Pawn, `/assets/pieces/pawn_${isWhite? 1 : 0}.svg`, position, isWhite, [Rule.pawnMove, Rule.pawnDouble, Rule.pawnCapture, Rule.enPassant]);
 }
 
 export function rook(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.Rook, `/assets/pieces/rook_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.verticalHorizontalMove]);
+    return new Piece(PieceType.Rook, `/assets/pieces/rook_${isWhite? 1 : 0}.svg`, position, isWhite, [Rule.verticalHorizontalMove]);
 }
 
 export function knight(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.Knight, `/assets/pieces/knight_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.knightMove]);
+    return new Piece(PieceType.Knight, `/assets/pieces/knight_${isWhite? 1 : 0}.svg`, position, isWhite, [Rule.knightMove]);
 }
 
 export function bishop(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.Bishop, `/assets/pieces/bishop_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.diagonalMove]);
+    return new Piece(PieceType.Bishop, `/assets/pieces/bishop_${isWhite? 1 : 0}.svg`, position, isWhite, [Rule.diagonalMove]);
 }
 
 export function queen(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.Queen, `/assets/pieces/queen_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.verticalHorizontalMove, Move.diagonalMove]);
+    return new Piece(PieceType.Queen, `/assets/pieces/queen_${isWhite? 1 : 0}.svg`, position, isWhite, [Rule.verticalHorizontalMove, Rule.diagonalMove]);
 }
 
 export function king(position: Position, isWhite: boolean): Piece {
-    return new Piece(PieceType.King, `/assets/pieces/king_${isWhite? 1 : 0}.svg`, position, isWhite, [Move.kingMove]);
+    return new Piece(PieceType.King, `/assets/pieces/king_${isWhite? 1 : 0}.svg`, position, isWhite, [Rule.kingMove, Rule.castle]);
 }

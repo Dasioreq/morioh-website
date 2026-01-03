@@ -4,10 +4,11 @@ import { HorizontalStack, VerticalStack } from "./Stacking";
 
 type Props = {
     board: Board,
-    update: React.Dispatch<React.SetStateAction<Board>>
+    update: React.Dispatch<React.SetStateAction<Board>>,
+    style?: React.CSSProperties
 };
 
-export function Chessboard({ board, update }: Props) {
+export function Chessboard({ board, update, style }: Props) {
     let boardTiles = []
     for(let y = 7; y >= 0; y--) {
         let boardRow = []
@@ -17,5 +18,5 @@ export function Chessboard({ board, update }: Props) {
         boardTiles.push(<HorizontalStack key = {y}>{boardRow}</HorizontalStack>)
     }
 
-    return <VerticalStack>{boardTiles}</VerticalStack>;
+    return <VerticalStack style={style}>{boardTiles}</VerticalStack>;
 }
