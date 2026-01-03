@@ -116,10 +116,10 @@ export class Rule {
         if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite)
             return undefined;
 
-        const xNewAbs = Math.abs(xNew - xPos);
-        const yNewAbs = Math.abs(yNew - yPos);
+        const dxAbs = Math.abs(xNew - xPos);
+        const dyAbs = Math.abs(yNew - yPos);
 
-        if(xNewAbs + yNewAbs != 2)
+        if(dxAbs + dyAbs != 2)
             return undefined;
 
         return Move.basicMove;
@@ -138,10 +138,10 @@ export class Rule {
             ? 1
             : -1
 
-        const xNewAbs = Math.abs(xNew - xPos);
-        const yNewAbs = Math.abs(yNew - yPos);
+        const dxAbs = Math.abs(xNew - xPos);
+        const dyAbs = Math.abs(yNew - yPos);
 
-        if(xNewAbs + yNewAbs != 2)
+        if(dxAbs + dyAbs != 2)
             return undefined;
 
         const piece = board.pieceAt([xNew, yNew - direction]);
@@ -167,10 +167,10 @@ export class Rule {
         if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite)
             return undefined;
 
-        const xNewAbs = Math.abs(xNew - xPos);
-        const yNewAbs = Math.abs(yNew - yPos);
+        const dxAbs = Math.abs(xNew - xPos);
+        const dyAbs = Math.abs(yNew - yPos);
 
-        if(xNewAbs + yNewAbs == 3)
+        if(dxAbs + dyAbs == 3)
             return Move.basicMove;
 
         return undefined;
@@ -185,10 +185,10 @@ export class Rule {
         if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite)
             return undefined;
 
-        const xNewAbs = Math.abs(xNew - xPos);
-        const yNewAbs = Math.abs(yNew - yPos);
+        const dxAbs = Math.abs(xNew - xPos);
+        const dyAbs = Math.abs(yNew - yPos);
 
-        if(yNewAbs != xNewAbs && yNewAbs != -xNewAbs)
+        if(dyAbs != dxAbs && dyAbs != -dxAbs)
             return undefined;
 
         const xDir = xNew > xPos
@@ -223,10 +223,10 @@ export class Rule {
         if(board.pieceAt([xNew, yNew])?.isWhite == self.isWhite)
             return undefined;
 
-        const xNewAbs = Math.abs(xNew - xPos);
-        const yNewAbs = Math.abs(yNew - yPos);
+        const dxAbs = Math.abs(xNew - xPos);
+        const dyAbs = Math.abs(yNew - yPos);
 
-        if(xNewAbs > 1 || yNewAbs > 1)
+        if(dxAbs > 1 || dyAbs > 1)
             return undefined;
 
         return Move.basicMove;
@@ -236,40 +236,45 @@ export class Rule {
         if(self.hasMoved)
             return undefined;
 
-
         const [xPos, yPos] = self.position;
-
-        if(xNew == xPos && yNew == yPos)
-            return undefined;
-
 
         if(yNew != yPos)
             return undefined;
 
+        if(xNew == xPos)
+            return undefined;
+
+        const dxAbs = Math.abs(xNew - xPos);
+
+        if(dxAbs != 2)
+            return undefined;
 
         const piece = board.pieceAt([xNew, yNew]);
-
-        if(!piece)
+        if(piece)
             return undefined;
-
-
-        if(board.pieceAt([xNew, yNew])?.isWhite != self.isWhite || board.pieceAt([xNew, yNew])?.pieceType != PieceType.Rook)
-            return undefined;
-
-
-        if(piece.hasMoved)
-            return undefined;
-
 
         const direction = xNew > xPos
-            ? -1
-            : 1
-        
-        for(let x = xNew + direction; x != xPos; x += direction)
-        {
-            if(board.pieceAt([x, yNew]))
-                return undefined;
+            ? 1
+            : -1;
+
+        let hasRook = false;
+        for(let xi = xPos + direction; xi < 8 && xi >= 0; xi += direction) {
+            let piece = board.pieceAt([xi, yPos]);
+
+            if(!piece)
+                continue;
+
+            if(piece.pieceType != PieceType.Rook)
+                break;
+
+            if(piece.isWhite != self.isWhite || piece.hasMoved)
+                continue;
+
+            hasRook = true;
+            break;
         }
+        if(!hasRook)
+            return undefined;
 
         return Move.castle;
     }

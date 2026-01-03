@@ -1,4 +1,4 @@
-import { Board, deselectPiece, isPlayersTeam, selectedPieceId, selectPiece, switchTeam } from "../data/Board";
+import { Board, deselectPiece, isPlayersTeam, selectedPieceId, selectPiece } from "../data/Board";
 import type { Position } from "../data/Position";
 import "./Tile.css";
 
@@ -30,7 +30,7 @@ export function Tile({ index, position, board, update }: Props) {
 
         move(cloned, selectedPiece, position)
         deselectPiece();
-        switchTeam();
+        // switchTeam();
 
         return cloned;
     }
